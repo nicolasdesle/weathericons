@@ -1,0 +1,588 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+	<title>Weather icons</title>
+
+	<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+	<script type="text/javascript" src="js/easeljs-NEXT.min.js"></script>
+	<script type="text/javascript" src="js/easeljs/utils/UID.js"></script>
+	<script type="text/javascript" src="js/easeljs/geom/Matrix2D.js"></script>
+	<script type="text/javascript" src="js/easeljs/display/DisplayObject.js"></script>
+	<script type="text/javascript" src="js/easeljs/display/Container.js"></script>
+	<script type="text/javascript" src="js/easeljs/display/Stage.js"></script>
+	<script type="text/javascript" src="js/easeljs/events/MouseEvent.js"></script>
+	<script type="text/javascript" src="js/easeljs/display/Shape.js"></script>
+	<script type="text/javascript" src="js/easeljs/display/Graphics.js"></script>
+	<script type="text/javascript" src="js/easeljs/events/EventDispatcher.js"></script>
+	
+	<script type="text/javascript" src="js/tweenjs/Tween.js"></script>
+	<script type="text/javascript" src="js/tweenjs/Ease.js"></script>
+	<script type="text/javascript" src="js/tweenjs/MotionGuidePlugin.js"></script>
+
+
+	<script type="text/javascript">
+
+	var canvas;
+	var stage;
+
+	var xArray = new Array();
+	var curIndex = 2;
+	var newX = 0;
+ 
+	var pathCounter = 0;
+
+	var globalRadius = 30;
+	var globalStroke = globalRadius/6;
+
+	var xoffset = globalRadius*5;
+	var yoffset = globalRadius*6.5;
+	var xmarge = 90;
+	var ymarge = 50;
+
+	function init() {
+
+
+	    canvas = document.getElementById('myCanvas');
+	    width = canvas.width;
+	    height = canvas.height;
+	    stage = new createjs.Stage(canvas);
+
+	    createjs.MotionGuidePlugin.install(createjs.Tween);
+		
+		
+	    var mySun = drawSun(0+xmarge+15, ymarge, globalRadius, globalStroke, "#333", 'round', "#FFF");
+ 		var myMoon = drawMoon(xoffset+xmarge+15, ymarge, globalRadius*1.2, globalStroke, "#333", 'round', "#FFF");
+ 		var myCloudDrops = drawCloud(xoffset*2+xmarge, ymarge, globalRadius, globalStroke, "#333",'square', "#FFF", 'drops');
+		var myCloudBalls = drawCloud(xoffset*3+xmarge, ymarge, globalRadius, globalStroke, "#333",'square', "#FFF", 'balls');
+
+		var myCloudFlakes= drawCloud(0+xmarge, yoffset, globalRadius, globalStroke, "#333",'square', "#FFF", 'flakes');
+		var myCloudThunder = drawCloud(xoffset+xmarge, yoffset, globalRadius, globalStroke, "#333",'square', "#FFF", 'thunder');
+		var myCloudSun = drawCloud(xoffset*2+xmarge, yoffset, globalRadius, globalStroke, "#333",'round', "#FFF", 'sun');
+		var myCloudMoon = drawCloud(xoffset*3+xmarge, yoffset, globalRadius, globalStroke, "#333",'round', "#FFF", 'moon');
+		
+		var myThunder = drawThunder(200, yoffset, 200, 3, null, 'round', "#333") 
+
+ 		stage.addChild(mySun);
+ 		stage.addChild(myMoon);
+ 		stage.addChild(myCloudDrops);
+ 		stage.addChild(myCloudBalls);
+ 		stage.addChild(myCloudThunder);
+ 		stage.addChild(myCloudFlakes);
+ 		stage.addChild(myCloudSun);
+ 		stage.addChild(myCloudMoon);
+		//stage.addChild(myThunder);
+
+	    stage.update();
+	    createjs.Ticker.setFPS(30);
+		createjs.Ticker.addEventListener("tick", stage);
+
+	}
+
+
+	// BASIC SHAPES
+
+	// circle
+
+	function drawCircle(x, y, stroke, radius, color, type, fill) {
+
+	    var s = new createjs.Shape();
+	    var g = s.graphics;
+
+
+	    g.setStrokeStyle(stroke, type, type);
+	    g.beginStroke(color);
+	    g.beginFill(fill);
+	    
+	    g.drawCircle(radius, radius, radius); 
+	    g.setStrokeStyle(1, type, type);
+	    g.endFill();
+
+	    s.x = x;
+		s.y = y;
+	    
+	    return s;
+
+	}
+
+
+	// half circle
+
+	function drawHalfmoon(x, y, radius, pi, rotation, stroke, color, type, fill) {
+
+		var s = new createjs.Shape();
+	    var g = s.graphics;
+
+		g.setStrokeStyle(stroke, type, type);
+	    g.beginStroke(color);
+	    g.beginFill(fill);
+		g.arc(radius*.5,radius*.5,radius,0.375*Math.PI,1.625*Math.PI, false);
+		g.arc(radius*.5+radius*.575,radius*.5,radius*0.95,1.425*Math.PI,0.575*Math.PI, true);
+	    g.setStrokeStyle(1, type, type);
+	    g.endFill();
+
+	    s.rotation = rotation;
+	    s.x = x;
+	    s.y = y;
+
+	    return s;
+
+	}
+
+	// cloud 
+
+
+	function drawCloud(x, y, radius, stroke, color, type, fill, effect) {
+
+		var container = new createjs.Container();
+		var s = new createjs.Shape();
+	    var g = s.graphics;
+	
+
+		g.setStrokeStyle(stroke, type, type);
+	    g.beginStroke(color);
+	    g.beginFill(fill);
+		g.arc(radius*.5, radius*.5, radius, 1.1*Math.PI,1.9*Math.PI, false);
+		g.arc(radius*1.6, radius*.9, radius*.7, 1.45*Math.PI,0.6*Math.PI, false);
+		g.arc(radius*.5, radius*1.15, radius*0.9, 0.15*Math.PI,0.85*Math.PI, false);
+		g.arc(-radius*0.6, radius*.9, radius*.7, 0.4*Math.PI,1.55*Math.PI, false);
+	    g.setStrokeStyle(1, type, type);
+	    g.endFill();
+
+	    switch(effect){
+
+		    case 'drops':
+
+				var myDrops = animateDrops(x, y+radius*1.25, radius*.175, 0, color,'round', color);
+				container.addChild(myDrops);
+				break;
+
+			case 'balls':
+
+				var myDrops = animateBalls(x, y+radius*1.25, radius*.175, 0, color,'round', color);
+				container.addChild(myDrops);
+				break;
+
+			case 'thunder':
+
+				var myThunder = drawThunder(x+radius*.1, y+radius*1.85, radius*1.35, 10, null, 'round', color) 
+				animateThunder(myThunder);
+				container.addChild(myThunder);
+				break;
+
+			case 'flakes':
+
+				var myFlakes = animateFlakes(x, y+radius*1.25, radius*.175, stroke, color,'round', color);
+				container.addChild(myFlakes);
+				break;
+
+			case 'sun':
+
+				var mySun = drawSun(x+radius*1.8, y-radius*.5, radius*.5,  stroke, color, type, fill);
+				//drawSun(x, y, radius, beamstart, beamstop, stroke, color, type, fill) {
+				container.addChild(mySun);
+				break;
+
+			case 'moon':
+
+				var myMoon = drawMoon(x+radius*2, y-radius*.7, radius*.75, stroke, color, type, fill);
+				//drawMoon(x, y, radius, stroke, color, type, fill) { {
+				container.addChild(myMoon);
+				break;
+
+	    }
+
+	    
+		container.addChild(s);
+
+	    s.x = x;
+	    s.y = y;
+
+	    return container;
+
+	}
+
+	// line
+
+	function drawLine(x, y, stroke, start, stop, color, type) {
+
+		var s = new createjs.Shape();
+	    var g = s.graphics;
+
+	    g.setStrokeStyle(stroke, type, type);
+	    g.beginStroke(color);
+	    g.moveTo(x, start);
+	    g.lineTo(0, stop);
+
+	    return s;
+
+	}
+
+	// drop
+
+	function drawDrop(x, y, radius, stroke, color, type, fill) {
+
+		var s = new createjs.Shape();
+	    var g = s.graphics;
+
+	    g.setStrokeStyle(stroke, type, type);
+	    //g.beginStroke(color);
+	    
+	    // begin fill
+	    g.beginFill(fill);
+	    
+	   
+	    g.moveTo(radius*.5, -radius);
+		g.arc(radius*.5, radius*.5, radius, 1.75*Math.PI, 1.25*Math.PI, false);
+		g.lineTo(radius*.5, -radius);
+	    g.setStrokeStyle(1, type, type);
+		
+		// end fill
+	    g.endFill();
+
+	    s.x = x;
+	    s.y = y;
+
+	    return s;
+
+	}
+
+	// thunder
+
+	function drawThunder(x, y, radius, stroke, color, type, fill) {
+
+		var s = new createjs.Shape();
+	    var g = s.graphics;
+
+	    var fff = radius/6
+
+	    g.setStrokeStyle(stroke, type, type);
+	    g.beginFill(fill);
+	    g.beginStroke(color);
+	   
+	    g.moveTo(radius*.5, 0);
+
+		g.lineTo(0, fff*3);
+		g.lineTo(radius*.15, fff*4);
+		g.lineTo(0, fff*7);
+
+		g.lineTo(radius*.5, fff*4);
+		g.lineTo(radius*.35, fff*3);
+		g.lineTo(radius*.5, 0);
+
+	    g.setStrokeStyle(1, type, type);
+		g.endFill();
+
+	    s.x = x;
+	    s.y = y;
+
+	    return s;
+
+	}
+
+	// flake
+
+	function drawFlake(x, y, stroke, radius, color, type, fill) {
+
+		var flake = drawBeams(x, y, 0, radius*1.1, stroke, color, 'round', 8, false, false);
+	    
+	    return flake;
+
+	}
+
+
+
+	// CONTAINER
+
+	function createContainer(instance1, instance2, instance3, instance4, x, y, rotation) {
+
+		var container = new createjs.Container();
+
+		container.addChild(instance1);
+		container.addChild(instance2);
+		container.addChild(instance3);
+		container.addChild(instance4);
+		container.x = x;
+		container.y = y;
+		container.rotation = rotation;
+
+		return container;
+
+    }
+
+	// ANIMATIONS
+
+	// sun beams
+
+	function drawBeams(myx, myy, start, stop, stroke, color, type, amount, anim, addtostage) {
+
+		var myContainer = new createjs.Container();
+
+		for (var i=0; i<amount; i++) {
+
+			var d = drawLine(0, 100, stroke, start, stop, color, type);
+			var x = createContainer(d, undefined, undefined, undefined, myx, myy, i*(360/amount));
+
+			d.rotation = i*(360/amount);
+			myContainer.addChild(d);
+			
+
+			
+
+
+		}
+
+		if(anim){
+				var tween = createjs.Tween.get(myContainer,{loop:true})
+							.to({rotation:myContainer.rotation+360}, 20000)
+		}
+
+
+		return myContainer;
+
+		
+
+	}
+
+
+	// moon animation
+
+	function animateMoon(target) {
+
+		var tween = createjs.Tween.get(target,{loop:true})
+					.to({rotation:0}, 6000)
+		 			.to({rotation:-45}, 6000)
+				
+
+
+	}
+
+	// drop animation
+
+	function animateDrop(target, yradius, del) {
+
+
+		var tween = createjs.Tween.get(target)
+					
+					//.call(console.log, ["wait..."], console) 
+
+					.set({x:newX}, target)
+					.to({y:0}, target)
+					.set({alpha:0}, target)
+
+					//.wait(del*350)
+
+					.set({alpha:100}, target)
+					.to({y:0+yradius*1.15}, 750)
+
+					.set({alpha:0}, target)
+					//.wait((.5-del)*350)
+					.call(setMyx, [target, yradius, del, 'drops']);
+					
+					
+
+		
+
+	}
+
+	function setMyx(target, yradius, del, effect) {
+            
+            newX = xArray[curIndex];
+			curIndex ++; 
+
+            if(curIndex>3){
+
+				curIndex = 0;
+
+            }
+
+            if(effect == 'drops'){
+
+	            animateDrop(target, yradius, del)
+
+	        }
+
+	         if(effect == 'flakes'){
+
+				target.rotation = 0;
+	            animateFlake(target, yradius, del)
+
+	         
+					
+				
+
+	        }
+	            
+
+        	
+
+            
+
+
+    }
+
+	// drops animation
+
+	function animateDrops(x, y, radius, stroke, color, type, fill) {
+
+		xArray.push(0, radius*5, (radius*5)*0.25, (radius*5)*0.5);
+
+		var myDrop1 = drawDrop(0, 0, radius, stroke, color, type, fill);
+		animateDrop(myDrop1, radius*10, 0);
+
+		var myDrop2 = drawDrop(0, 0, radius, stroke, color, type, fill);
+		setTimeout(animateDrop, 375, myDrop2, radius*10, .5);
+
+		var x = createContainer(myDrop1, myDrop2, undefined, undefined, x, y, 0);
+		return x;
+
+	}
+
+
+	// flake animation
+
+	function animateFlake(target, yradius, del) {
+
+		var path1 = [0,0, 0,yradius*.5,  yradius*.25,yradius*.75, yradius*.5,yradius, yradius*.5,yradius*1.25];
+		var path2 = [yradius*.5,0, yradius*.5,yradius*.5,  yradius*.25,yradius*.75,  0,yradius, 0,yradius*1.25];
+
+		var paths = [path1, path2];
+
+		
+		var currentPath = paths[pathCounter];
+		pathCounter++;
+
+		if(pathCounter >= 2){
+			pathCounter = 0;
+		}
+
+		//console.log(currentPath)
+		
+
+		var tween = createjs.Tween.get(target)
+					
+
+					//.call(console.log, ["wait..."], console) 
+
+					.set({x:newX}, target)
+					.to({y:0}, target)
+					.set({alpha:0}, target)
+
+					//.wait(del*350)
+
+					.set({alpha:100}, target)
+					//.to({y:0+yradius}, 750)
+					.to({guide:{path:currentPath}, rotation:-180}, 1500)
+
+					.set({alpha:0}, target)
+					//.wait((.5-del)*350)
+					.call(setMyx, [target, yradius, del, 'flakes']);
+					
+					
+
+		
+
+	}
+
+	// balls animation 
+
+	function animateBalls(x, y, radius, stroke, color, type) {
+
+		xArray.push(0, radius*5, (radius*5)*0.25, (radius*5)*0.5);
+
+		var myBall1 = drawCircle(0, 0, 0, radius, color, type, color);
+		animateDrop(myBall1, radius*10, 0);
+
+		var myBall2 = drawCircle(0, 0, 0, radius, color, type, color);
+		setTimeout(animateDrop, 375, myBall2, radius*10, .5);
+
+		var x = createContainer(myBall1, myBall2, undefined, undefined, x, y, 0);
+		return x;
+
+	}
+
+	// flakes animation 
+
+	function animateFlakes(x, y, radius, stroke, color, type) {
+
+		//xArray.push(0, radius*5, (radius*5)*0.25, (radius*5)*0.5);
+
+		var myFlake1 = drawFlake(x, y, stroke*.5, radius, color, type, color);
+		animateFlake(myFlake1, radius*10, 0);
+
+		//function drawFlake(x, y, stroke, radius, color, type, fill) {
+		var myFlake2 = drawFlake(x, y, stroke*.5, radius, color, type, color);
+		setTimeout(animateFlake, 750, myFlake2, radius*10, .5);
+
+		var x = createContainer(myFlake1, myFlake2, undefined, undefined, x, y, 0);
+		return x;
+
+	}
+
+	// thunder animation 
+
+	function animateThunder(target) {
+
+		var tween = createjs.Tween.get(target,{loop:true})
+					
+					.to({alpha:0}, 250)
+					.to({alpha:100}, 250)
+					.set({alpha:0}, target)
+					.to({alpha:100}, 100)
+					.set({alpha:0}, target)
+					.to({alpha:100}, 100)
+					.wait(350)
+
+	}
+
+	// DRAW FINAL ICONS
+
+	// sun 
+
+	function drawSun(x, y, radius, stroke, color, type, fill) {
+
+		var beams = drawBeams(x, y, radius*1.5, radius*2, stroke, color, type, 8, true, true);
+		var sunc = drawCircle(-radius, -radius, stroke, radius, color, type, fill);
+		var beamsContainer = createContainer(sunc, beams, undefined, undefined, x, y+radius, 0);
+		return beamsContainer;
+
+
+	}
+
+	// moon
+
+	function drawMoon(x, y, radius, stroke, color, type, fill) {
+
+		var halfMoon = drawHalfmoon(-radius*.5, -radius*.5, radius, 1.25, 0, stroke, color, type, fill);
+
+	    var moonContainer = createContainer(halfMoon, undefined, undefined, undefined, x, y+radius*.75, -45);
+	    animateMoon(moonContainer);
+
+	    return moonContainer;
+		
+
+	}
+
+
+	</script>
+
+<style type="text/css">
+
+	body{
+
+        margin: 0;
+        background-color: #fafafa;
+        padding:0;
+    }
+
+</style>
+
+</head>
+
+<body onload="init()">
+
+      <canvas id="myCanvas" width="1200" height="900" ></canvas>
+
+</body>
+
+</html>
